@@ -1,6 +1,6 @@
 # blockchain-developer-bootcamp-final-project
 
-# DeFi Payment Processing Rails
+# Project Idea: DeFi Payment Processing Rails
 
 - User deposits crypto assets into Smart Contract on Ethereum
 - User's spending balance increases based on the value of the deposited collateral
