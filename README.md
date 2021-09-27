@@ -1,8 +1,8 @@
 # blockchain-developer-bootcamp-final-project
 
-# Project Idea: DeFi Payment Processing Rails
+# Project Idea: Crypto Donations Platform
 
-- User deposits crypto assets into Smart Contract on Ethereum
-- User's spending balance increases based on the value of the deposited collateral
-- Data is bridged to a Layer 2 chain (i.e. Polygon)
-- Users are able to transact for real world Goods & Services on Layer 2, enjoying minimal gas fees
+- User donates crypto assets into Smart Contract on Ethereum
+- Smart contract converts the donated crypto into stablecoins, which are allocated to the recipient charity
+- Donation transaction is recorded on the blockchain with adequate information for tax reporting purposes
+- Charity can withdraw accumulated donations into their wallets
