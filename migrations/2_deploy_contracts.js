@@ -12,8 +12,8 @@ module.exports = async function(deployer, network, accounts) {
 
 
 	// Deploy TokenFarm
-	await deployer.deploy(TokenFarm)
-	const tokenFarm = await TokenFarm.deployed()
+	//await deployer.deploy(TokenFarm)
+	//const tokenFarm = await TokenFarm.deployed()
 
 
 
@@ -27,43 +27,7 @@ module.exports = async function(deployer, network, accounts) {
 
 
 
-/*
-	//Deploy EthBridge
-	await deployer.deploy(EthBridge)
-	const ethBridge = await EthBridge.deployed()
-	// Deploy EthBridge_Upgrade
-	await deployer.deploy(EthBridge_Upgrade)
-	const ethBridge_Upgrade = await EthBridge_Upgrade.deployed()
-	ethBridge.set_delegate_address(ethBridge_Upgrade.address);///link proxy contract and implementation contract
-*/
-/*
-	await deployer.deploy(MaticBridge)
-	const maticBridge = await MaticBridge.deployed()
-*/
 
-
-/*
-/////////////test delegate_call///////////////////////////////////////////////////////////////////////////
-
-	let collected_fees= await donation_Processor.new_fee();
-	let collected_fees_delegate= await donation_Upgrade.new_fee();
-	console.log(collected_fees);
-	console.log(collected_fees_delegate);
-
-
-	await donation_Processor.send(6789);
-	await donation_Processor.execute_token_burn();
-
-	collected_fees= await donation_Processor.new_fee();
-	collected_fees_delegate= await donation_Upgrade.new_fee();
-
-	console.log(collected_fees);
-	console.log(collected_fees_delegate);
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-*/
 
 	//truffle migrate --reset// - Updates smart contract files
 	//truffle migrate -f # --to # - Runs specific migration files

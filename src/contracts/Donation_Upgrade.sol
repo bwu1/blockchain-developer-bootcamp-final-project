@@ -4,21 +4,17 @@ pragma solidity ^0.7.6;
 pragma experimental ABIEncoderV2;
 import "./DaiToken.sol";
 
+
+/// @title Smart contract implementing the delegate call function for Donation_Processor
+/// @author Bofan Wu
+/// @dev All function calls are currently implemented without side effects
 contract Donation_Upgrade {
     string public name = "Donation_Processor";
-    //DaiToken public daiToken;
     address public owner;
-    //address public final_currency = 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7;////Pancakeswap simulator BUSD address
-    //address public final_currency = 0x2963EEef46978C745b45B6Da29B78d9cC0708855;////convert all donations into stablecoins, currently set to fake stablecoin
-    //address public final_currency = 0xb58A25294f399f7056a4cD5DAE3c2Fb9259e360d;//BSC USDC (6 decimals)
     address public final_currency = 0x07865c6E87B9F70255377e024ace6630C1Eaa37F;//Circle Ropsten USDC
-    //address public final_currency = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;//Circle Mainnet USDC
-    //address public final_currency = 0xaa57543e9246E67c82E45E7e9faf90548A6297F7;////Kovan testnet stablecoin
     uint public final_currency_decimal=6;
     using SafeMath for uint256;
 
-    //mapping (address => donation_transaction[]) public donation_transactions;//record-keeping for charities
-    //mapping (address => donation_transaction[]) public token_holder_donations;//record keeping for individuals
     uint public donation_transaction_fee;//in basis points - (i.e.300)
     uint public collected_transaction_fees;//in stablecoins
     IUniswapV2Router02 public uniswapV2Router;
@@ -28,6 +24,7 @@ contract Donation_Upgrade {
     uint public wire_withdraw_count;
     mapping (address => bool) public is_admin;
     uint24 public constant poolFee = 3000;
+    mapping (address => uint) public donation_count;
 
     event Transaction(
         uint256 amount,
@@ -49,29 +46,6 @@ contract Donation_Upgrade {
         uint output_decimals
     );
 
-
-    /*struct donation_transaction{
-        uint amount;
-        uint converted_amount;
-        uint received_amount;
-        string currency;
-        uint date;
-        string org_name;
-        uint org_ein;
-        address donor_address;
-        uint input_decimals;
-        uint output_decimals;
-    }
-    struct wire_request{
-        uint id;
-        address charity_address;
-        uint amount;
-        uint timestamp;
-        uint output_decimals;
-    }
-    wire_request[] wire_request_array;
-    */
-
     constructor() public {
         owner = msg.sender;
     }
@@ -79,7 +53,14 @@ contract Donation_Upgrade {
     receive() external payable {}
 
     
-
+    /// @notice Processes a donation from a user
+    /// @param _amount  amount of the donated ERC20 token
+    /// @param _currency  name of the donated ERC20 token
+    /// @param organization_name  name of the organization to receive the donation
+    /// @param organization_ein  EIN of the organization to receive the donation
+    /// @param charity_wallet  Ethereum address of the organization to receive the donation
+    /// @param currency_address  Ethereum address of the donated ERC20 token
+    /// @param decimals decimal precision of the donated ERC20 token
     function process_donation(uint _amount,string calldata _currency, string calldata organization_name, uint organization_ein, address payable charity_wallet, address currency_address, uint decimals) external payable{
         
         uint stablecoin_amount=_amount;//by default, assumes the donation is in stablecoin
@@ -89,19 +70,6 @@ contract Donation_Upgrade {
         if(keccak256(abi.encodePacked(_currency)) == keccak256(abi.encodePacked("ETH"))){//convert ETH to Stablecoin
                 
             uint256 initialBalance = final_token.balanceOf(address(this));
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////UniSwapV2
-           /* address[] memory path = new address[](2);
-            path[0] = uniswapV2Router.WETH();//daiToken.uniswapV2Router()
-            path[1] = final_currency;
-
-            uniswapV2Router.swapExactETHForTokensSupportingFeeOnTransferTokens{value:_amount}(//.value(_amount)|||daiToken.uniswapV2Router()
-                0, // accept any amount of stablecoins
-                path,
-                address(this),
-                block.timestamp
-            );
-            */
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////UniSwapV3
             ISwapRouter.ExactInputSingleParams memory params =
                 ISwapRouter.ExactInputSingleParams({
@@ -131,24 +99,6 @@ contract Donation_Upgrade {
             if(currency_address!=final_currency){//convert any coin into stablecoin (unless the coin itself is already the stablecoin)
                 uint256 initialBalance = final_token.balanceOf(address(this));
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////UniSwapV2
-                /*this_token.approve(address(uniswapV2Router), _amount);//daiToken.uniswapV2Router()
-
-
-                address[] memory path = new address[](3);
-                path[0] = currency_address;
-                path[1] = uniswapV2Router.WETH();//daiToken.uniswapV2Router()
-                path[2] = final_currency;
-
-                uniswapV2Router.swapExactTokensForTokensSupportingFeeOnTransferTokens(//daiToken.uniswapV2Router()
-                    _amount,
-                    0, // accept any amount of stablecoins
-                    path,
-                    address(this),
-                    block.timestamp
-                );*/
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////UniSwapV3
                 this_token.approve(address(uniswapV3Router), _amount);
 
@@ -171,13 +121,12 @@ contract Donation_Upgrade {
         }
 
         process_money_transfer(stablecoin_amount, charity_wallet, final_token);//always transfer out in stablecoin
-        /*if(donation_reward_allocation>0 && currency_address!=address(daiToken)){//reward early users of the platform when they donate (except when they donate in GIFT token)
-            reward_early_donors(stablecoin_amount);//1:1 reward ratio
-        }*/
         store_donation_data(_amount, _currency, stablecoin_amount, charity_wallet, organization_name, organization_ein, decimals);
         return;
     }
 
+    /// @notice Calculate donation amount after subtracting transaction fee
+    /// @param _amount  amount donated prior to subtracting fee
     function return_donation_after_fee(uint _amount) internal view returns (uint){
         uint one_hundred=10000;//in basis points
         uint subtract_fee=one_hundred.sub(donation_transaction_fee);
@@ -185,6 +134,11 @@ contract Donation_Upgrade {
         donation_after_fee=donation_after_fee.div(one_hundred);
         return donation_after_fee; 
     }
+
+    /// @notice Accumulate donated funds for the respective recipient charity
+    /// @param _amount  amount donated prior to subtracting fee
+    /// @param charity_wallet  address the recipient charity
+    /// @param _final_token  token that all donations are converted into
     function process_money_transfer(uint _amount, address payable charity_wallet, IERC20 _final_token) internal{
         
         uint return_donation_after_fee_calculated=return_donation_after_fee(_amount);
@@ -197,22 +151,27 @@ contract Donation_Upgrade {
         //_final_token.transfer(charity_wallet, return_donation_after_fee_calculated);//transfer donation from smart contract to charity wallet address
         
     }
+
+    /// @notice Store the donation transaction on the blockchain by emitting an event
+    /// @param _amount  amount of the original donated ERC20 token
+    /// @param _currency  name of the original donated ERC20 token
+    /// @param stablecoin_amount  amount of stablecoins post DEX conversion
+    /// @param charity_wallet  recipient charity wallet
+    /// @param _org_name  recipient charity organization name
+    /// @param _org_ein  recipient charity EIN number
+    /// @param _decimals  decimal precision of the original donated ERC20 token
     function store_donation_data(uint _amount, string memory _currency,uint stablecoin_amount, address charity_wallet,string memory _org_name, uint _org_ein, uint _decimals) internal{
 
         uint return_donation_after_fee_calculated=return_donation_after_fee(stablecoin_amount);
+        donation_count[msg.sender]=donation_count[msg.sender]+1;
         emit Transaction(_amount, stablecoin_amount, return_donation_after_fee_calculated, _currency, _org_name, msg.sender, charity_wallet, _decimals, final_currency_decimal, block.timestamp);
-/*
-        
-        donation_transaction memory new_donation = donation_transaction({amount:_amount, converted_amount:stablecoin_amount, received_amount:return_donation_after_fee_calculated, currency:_currency, date:block.timestamp, org_name:_org_name, org_ein:_org_ein, donor_address:msg.sender, input_decimals:_decimals, output_decimals:final_currency_decimal});
-
-        donation_transactions[charity_wallet].push(new_donation);
-        token_holder_donations[msg.sender].push(new_donation);
-*/
         return;
     }
-    function execute_token_burn() external{
-        //new_fee=address(this).balance;
-    }
+
+    /// @notice A charity calls this function to withdraw accumulated donations
+    /// @param _charity_address  address of the charity
+    /// @param _withdraw_address  address to withdraw to
+    /// @param _amount  amount to withdraw 
     function withdraw_donation(address _charity_address, address _withdraw_address, uint _amount) public{
 
         if(msg.sender!=_charity_address){//only the charity can withdraw funds
@@ -236,53 +195,6 @@ contract Donation_Upgrade {
         IERC20 final_token = IERC20(final_currency);
         final_token.transfer(_withdraw_address, _amount);//withdraw donation from smart contract to charity|||USDC only only 6 decimal places
     }
-
-
-    /*function reward_early_donors(uint _amount) internal{
-        
-        if(donation_reward_allocation>_amount){
-            donation_reward_allocation=donation_reward_allocation.sub(_amount);
-            daiToken.transfer(msg.sender, _amount);
-        }
-        else{
-            uint left_over_rewards=donation_reward_allocation;
-            donation_reward_allocation=0;
-            daiToken.transfer(msg.sender, left_over_rewards);
-        }
-    }*/
-    /*function process_donation(string[] calldata _concactenated_name,uint _amount,string calldata _currency, string calldata _formatted_date,string calldata organization_name, address payable charity_wallet) external payable{
-        ///this version converts everything into ETH/BNB
-
-
-        uint eth_amount=_amount;
-        if(!(keccak256(abi.encodePacked(_currency)) == keccak256(abi.encodePacked("ETH")))){
-            daiToken.transferFrom(msg.sender, address(this), _amount);///transfer in value first - in case user balance is not enough, function will revert here
-            // capture the contract's current ETH balance.
-            // this is so that we can capture exactly the amount of ETH that the
-            // swap creates, and not make the liquidity event include any ETH that
-            // has been manually sent to the contract
-            uint256 initialBalance = address(this).balance;
-
-            daiToken.approve(address(daiToken.uniswapV2Router()), _amount);//currently testing only using GIFT - but will need to get approval of any coin
-            address[] memory path = new address[](2);
-            path[0] = address(daiToken);//will need to be dynamic variable to match the donated coin
-            path[1] = daiToken.uniswapV2Router().WETH();
-
-            daiToken.uniswapV2Router().swapExactTokensForETHSupportingFeeOnTransferTokens(
-                _amount,
-                0, // accept any amount of ETH
-                path,
-                address(this),//msg.sender
-                block.timestamp
-            );
-
-            eth_amount = address(this).balance.sub(initialBalance);
-        }
-
-        process_money_transfer(eth_amount, charity_wallet);//always transfer out in ETH
-        store_donation_data(_concactenated_name[0], _concactenated_name[1], _amount, _currency, eth_amount, _formatted_date, charity_wallet, organization_name, msg.sender);
-        return;
-    }*/
 
 
 

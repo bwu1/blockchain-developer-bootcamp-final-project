@@ -3,15 +3,8 @@ import ReactDOM from 'react-dom';
 import Web3 from 'web3';
 import BigNumber from "bignumber.js";
 import {CountUp} from "countUp.js-master";
-import {Transaction} from "ethereumjs-tx";
-import Common from 'ethereumjs-common'
-import DaiToken from '../abis/DaiToken.json'
 import DappToken from '../abis/DappToken.json'
-import TokenFarm from '../abis/TokenFarm.json'
 import Donation_Processor from '../abis/Donation_Processor.json'
-import EthBridge from '../abis/EthBridge.json'
-import MaticBridge from '../abis/MaticBridge.json'
-import AutoStaking from '../abis/AutoStaking.json'
 
 
 import Navbar from './Navbar'
@@ -93,7 +86,7 @@ class App extends Component {
 
         const web3 = window.web3;
        
-        let networkId;//const networkId = await web3.eth.net.getId();/// networkId_global - fails in the tokenFarmData section
+        let networkId;//const networkId = await web3.eth.net.getId();///
         if(window.ethereum){
 
             networkId = window.ethereum.networkVersion;
@@ -130,7 +123,7 @@ class App extends Component {
 
         }
         else{
-            this.create_popup("error","Please connect to the proper network in your Web3 browser - click the 'Help' link for more info");
+            this.create_popup("error","Please connect to the Ropsten network in your Web3 browser");
 
         }
         
@@ -159,18 +152,6 @@ class App extends Component {
     else{////metamask not installed
         const web3= new Web3(new Web3.providers.HttpProvider(http_provider_url));
         const networkId =networkId_global;
-        const tokenFarmData = TokenFarm.networks[networkId];
-        if(tokenFarmData) {
-
-            const tokenFarm = new web3.eth.Contract(TokenFarm.abi, tokenFarmData.address)
-            this.setState({ tokenFarm })
-
-            //let charities_list = await tokenFarm.methods.get_approved_charities_list().call()
-            //this.setState({ charities_list: charities_list })
-        }
-        else{
-          window.alert('TokenFarm contract not deployed to detected network.');
-        }
         this.setState({ loading: false })
     }
     let all_merchants=await this.fetch_all_merchants();
@@ -558,21 +539,6 @@ update_supported_charities(charity_array){
 
 meta_load_wallet_data = async() =>{
 
-  /*
-    if(this.state.daiToken_loaded===false){
-      return
-    }
-
-    let daiTokenBalance = await this.state.daiToken.methods.balanceOf(this.state.account).call()
-    this.update_wallet_balance(daiTokenBalance);
-
-    let fetch_user_data = await this.state.tokenFarm.methods.get_user_data(this.state.account).call();//display_stake_num
-
-    this.update_total_staked_balance(fetch_user_data["total_staked"]);
-    this.update_reward_balance(fetch_user_data["uncollected_rewards"]);
-    this.update_supported_charities(fetch_user_data["supported_charities"]);/////let test_array=[[10*10**18,0],[3.12312*10**18,5]]///fake allocations for testing purposes
-    this.state.meta_mask_logged_in=true;
-    */
 }
  meta_mask_approved = (result) =>{
       var formatted_address=window.web3.utils.toChecksumAddress(result[0]);
@@ -651,7 +617,7 @@ meta_load_wallet_data = async() =>{
 
       let check_metamask_network = await this.check_if_correct_network();///not connected to proper network
       if(check_metamask_network==false){
-        this.create_popup("error","Please connect to the proper network in your Web3 browser - click the 'Help' link for more info");
+        this.create_popup("error","Please connect to the Ropsten network in your Web3 browser");
         return;
       }
 
@@ -965,67 +931,6 @@ confirm_withdraw_donation = async () =>{
     */
 
 }
-confirm_unstake = async () =>{
-
-  const input_amount = document.querySelector('#input_amount') ;
-  var stake_amount=input_amount.value;
-
-
-  if(stake_amount==""){
-    return;
-  }
-  if(stake_amount<=0){
-    return;
-  }
-  if(isNaN(parseFloat(stake_amount))==true){
-    return;
-  }
-
-
-  var amount=this.tokens(stake_amount);
-  var charity_id=current_charity_for_staking;
-
-
-
-
-
-  if(!current_charity_for_staking || isNaN(parseFloat(current_charity_for_staking))==true){
-    alert("Something went wrong. Please try again");
-    return;
-  }
-
-  for(var i = 0; i < this.state.supported_charities.length; i++){
-    if(this.state.supported_charities[i][1]==charity_id){
-      if(this.state.supported_charities[i][0]<amount){///check if user has enough staked for this charity  
-        alert("You don't have enough staked for this charity");        
-        return;
-      }
-    } 
-  }
-
-////////////////////////////////////////////pass number pre-check verifications
-
-    //amount=amount.toString();
-    amount=amount.toLocaleString('fullwide', {useGrouping:false});
-    charity_id=charity_id.toString();
-
-    var check_network= await this.check_if_correct_network();
-    if(check_network == false){
-      alert("Please connect to the proper blockchain network");
-      return;
-    }
-
-
-    document.querySelector('#unstake_input_button').disabled=true;
-    this.show_loader();
-    var that=this;
-
-    this.state.tokenFarm.methods.remove_stake_charity_allocation(amount,charity_id).send({ from: this.state.account, gas: staking_gas}).on('receipt', (hash) => {
-          this.stake_update_frontend(amount,charity_id,"sub");
-          this.close_dialog();
-
-    }).catch(function(e){that.hide_loader(); if(e.code!==4001){alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-}
 add_stake_pressed = async (charity_id, charity_name) =>{
 
 
@@ -1038,79 +943,7 @@ add_stake_pressed = async (charity_id, charity_name) =>{
 
     this.create_popup("input","stake",charity_name, charity_id);
   }
-confirm_stake = async () =>{
 
-  const input_amount = document.querySelector('#input_amount') ;
-  var stake_amount=input_amount.value;
-
-  if(stake_amount==""){
-    return;
-  }
-  if(stake_amount<=0){
-    return;
-  }
-  if(isNaN(parseFloat(stake_amount))==true){
-    return;
-  }
-
-  var amount=this.tokens(stake_amount);///account for rounding errors
-  var charity_id=current_charity_for_staking;
-  if(amount>this.state.daiTokenBalance){
-    alert("You don't have enough tokens!");
-    return;
-  }
-  if(!current_charity_for_staking || isNaN(parseFloat(current_charity_for_staking))==true){
-    alert("Something went wrong. Please try again");
-    return;
-  }
-////////////////////////////////////////////pass number pre-check verifications
-
-    amount=amount.toLocaleString('fullwide', {useGrouping:false});
-    charity_id=charity_id.toString();
-
-    console.log("number sent to backend: " + amount);
-
-    var check_network= await this.check_if_correct_network();
-    if(check_network == false){
-      alert("Please connect to the proper blockchain network");
-      return;
-    }
-
-
-
-    document.querySelector('#stake_input_button').disabled=true;
-    this.show_loader();
-    var that=this;
-
-
-    let daiTokenAllowance=await this.state.daiToken.methods.allowance(this.state.account,this.state.tokenFarm._address).call();
-    
-
-    if(parseInt(daiTokenAllowance)<parseInt(amount)){///need to approve first
-      var ammout_to_approve = "100000000000000000000000000";
-      this.state.daiToken.methods.approve(this.state.tokenFarm._address, ammout_to_approve).send({ from: this.state.account }).on('transactionHash', (hash) => {//transactionHash
-          this.state.tokenFarm.methods.add_stake_charity_allocation(amount,charity_id).send({ from: this.state.account, gas: staking_gas}).on('receipt', (hash) => {
-            this.stake_update_frontend(amount,charity_id,"add");
-            this.close_dialog();
-
-          }).catch(function(e){that.hide_loader(); if(e.code!==4001){alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-      }).catch(function(e){that.hide_loader(); if(e.code!==4001){alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-    }
-    else{////can go ahead and directly confirm transaction
-
-         this.state.tokenFarm.methods.add_stake_charity_allocation(amount,charity_id).send({ from: this.state.account, gas: staking_gas}).on('receipt', (hash) => {
-            this.stake_update_frontend(amount,charity_id,"add");
-            this.close_dialog();
-
-          }).catch(function(e){that.hide_loader(); if(e.code!==4001){alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-    }
-
-
-
-
-
-
-}
 set_charity_claim_global_variable =(uncollected_rewards) =>{
   if(already_claimed_charity_rewards===true){
     global_charity_reward_balance=0;
@@ -1127,42 +960,7 @@ charity_claim_pressed = async () =>{
     this.create_popup("input","claim_charity",global_charity_reward_balance);
 
 }
-confirm_charity_claim = async () =>{
 
-
-    var check_network= await this.check_if_correct_network();
-    if(check_network == false){
-      alert("Please connect to the proper blockchain network");
-      return;
-    }
-
-    var uncollected_rewards=global_charity_reward_balance;// avoid looping through charity array
-
-   /* var uncollected_rewards=0;
-    for(var i = 0; i < this.state.charities_list.length; i++){
-      var this_charity=this.state.charities_list[i];
-        if(this_charity.wallet_address===this.state.account){//found charity
-            uncollected_rewards=this_charity.uncollected_rewards;
-            break;
-        }
-
-    }*/
-
-  if(uncollected_rewards<=0 || already_claimed_charity_rewards===true){
-    alert("No rewards available. Check back later!");
-    return;
-  }
-
-    document.querySelector('#claim_charity_input_button').disabled=true;
-    this.show_loader();
-    var that=this;
-
-   this.state.tokenFarm.methods.collect_charity_rewards().send({ from: this.state.account, gas: claim_rewards_gas}).on('receipt', (hash) => {
-      this.claim_charity_reward_update_frontend(uncollected_rewards);
-      this.close_dialog();
-
-    }).catch(function(e){that.hide_loader(); if(e.code!==4001){alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-}
 claim_pressed = async (charity_id, charity_name) =>{
 
     if(this.state.meta_mask_logged_in==false){
@@ -1176,35 +974,7 @@ claim_pressed = async (charity_id, charity_name) =>{
 
     return;
 }
-confirm_claim = async () =>{
 
-  if(this.state.uncollected_rewards<=0){
-    alert("No rewards available. Stake some GIFT tokens and check back later!");
-    return;
-  }
-
-
-
-    var check_network= await this.check_if_correct_network();
-    if(check_network == false){
-      alert("Please connect to the proper blockchain network");
-      return;
-    }
-
-    document.querySelector('#claim_input_button').disabled=true;
-    this.show_loader();
-    var that=this;
-
-
-
-   this.state.tokenFarm.methods.collect_staker_rewards().send({ from: this.state.account, gas: claim_rewards_gas}).on('receipt', (hash) => {
-      this.claim_reward_update_frontend();
-      this.close_dialog();
-
-    }).catch(function(e){that.hide_loader(); if(e.code!==4001){alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-
-
-}
 edit_charity_info_pressed = () =>{
    window.open("https://docs.google.com/forms/d/e/1FAIpQLSd3jV9uBk9WjT9TqnIBW8U5mW6etRk9gmxXjqH8eGeryuHekw/viewform?usp=sf_link", '_blank').focus();
 }
@@ -1280,12 +1050,7 @@ admin_page_pressed = async () =>{
   let final_currency= await this.state.donationProcessor.methods.final_currency().call();
   let router_address= await this.state.donationProcessor.methods.uniswapV2Router().call();
 
-  /*let reward_distribution_increment= await this.state.tokenFarm.methods.staking_reward_distribution_increment().call();
-  reward_distribution_increment=this.from_wei(reward_distribution_increment);
-  let min_reward_to_distribute= await this.state.tokenFarm.methods.minimum_distribution_threshold_charities().call();
-  min_reward_to_distribute=this.from_wei(min_reward_to_distribute);
-  let reward_interval= await this.state.tokenFarm.methods.reward_interval().call();
-  */
+
 
   document.getElementById('curr_transfer_tax').innerHTML=current_transfer_tax+"%";
   document.getElementById('curr_lp_tax').innerHTML=current_lp_tax+"%";
@@ -1383,29 +1148,8 @@ add_charity_pressed = async () =>{
         
     }
     xhr.send("type=" + "add_merchant" + "&value=" + JSON.stringify(new_org));
-
-/*
-  this.state.tokenFarm.methods.add_charity(new_org.name, new_org.description, new_org.details, new_org.url, new_org.ein, new_org.wallet_address, new_org.us_tax_deduction).send({ from: this.state.account, gas: admin_gas, gasPrice: global_gasPrice}).on('receipt', (hash) => {
-      this.create_popup("notice", "Complete", "Organization was successfully added. Refresh the page to see the change");
-      document.getElementById('org_name').value="";
-      document.getElementById('org_ein').value="";
-      document.getElementById('org_industry').value="";
-      document.getElementById('org_details').value="";
-      document.getElementById('org_website').value="";
-      document.getElementById('org_wallet').value="";
-      document.querySelector('input[id="org_tax_status_yes"]').checked=false;
-      document.querySelector('input[id="org_tax_status_no"]').checked=false;
-      document.getElementById('add_charity_button').disabled=false;
-
-  }).catch(function(e){document.getElementById('add_charity_button').disabled=false; if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-  */
 }
-activate_deactivate_charity = async (charity_wallet_address, type) =>{
 
-  this.state.tokenFarm.methods.activate_deactivate_charity(charity_wallet_address, type).send({ from: this.state.account, gas: admin_gas}).on('receipt', (hash) => {
-      this.create_popup("notice", "Complete", "Action successful. Refresh the page to see the change");
-  }).catch(function(e){if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-}
 click_logo = async () =>{
   this.reset_state();
   window.location.reload();
@@ -1729,17 +1473,6 @@ confirm_donation_pressed = async() =>{
 
     if(currency==="ETH"){
 
-
- /* 
-
-
-        this.state.ethBridge.methods.process_deposit(amount,currency,currency_address,decimals).send({ from: this.state.account, gas: donation_gas, value: amount})
-        .on('receipt', (hash) => {
-            this.successful_donation_animation();
-
-        }).catch(function(e){that.hide_loader(); document.querySelector('#donate_confirm_button').disabled=false; if(back_btn){back_btn.style.display="block";} if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-*/
-
         this.state.donationProcessor.methods.process_donation(amount,currency,charity_name,charity_ein,charity_wallet,currency_address,decimals).send({ from: this.state.account, gas: donation_gas, value: amount})
         .on('receipt', (hash) => {
             this.successful_donation_animation();
@@ -1898,26 +1631,6 @@ donate_continue_pressed = async() =>{
 }
 click_individual_transaction = async(this_transaction) =>{
 
-
-
-
-
-/*
-
-
-          this.state.donationProcessor.methods.setRouterAddress("0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D").send({ from: this.state.account, gas: donation_gas}).on('receipt', (hash) => {
-          this.successful_donation_animation();
-
-          }).catch(function(e){document.querySelector('#donate_confirm_button').disabled=false; if(e.code!==4001){console.log(e); alert("Transaction Error - Check MetaMask and then try again");}}) 
-
-
-
-          this.state.tokenFarm.methods.update_charity_info("Ocean CleanUp","Environmental","The Ocean Cleanup is developing a passive cleanup method, which uses the natural oceanic forces to rapidly and cost-effectively clean up the plastic already in the oceans","http://www.amazon.com","77777777","0xe72341A2249B99600a90Fd083dcB73401515AC88","0xe72341A2249B99600a90Fd083dcB73401515AC88", true).send({ from: this.state.account, gas: donation_gas}).on('receipt', (hash) => {
-          this.successful_donation_animation();
-
-          }).catch(function(e){document.querySelector('#donate_confirm_button').disabled=false; if(e.code!==4001){console.log(e); alert("Transaction Error - Check MetaMask and then try again");}}) 
-
-*/
 
 
   var donor_info="<span>Payer Wallet Address: </span>"+ "<span class='receipt_info'>"+this_transaction.donor_address+"</span><br><br>";
@@ -2141,25 +1854,6 @@ set_router_address = async (new_router_address) =>{
 
   }).catch(function(e){if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
 }
-set_staking_reward_distribution_increment = async (new_integer) =>{
-  this.state.tokenFarm.methods.set_staking_reward_distribution_increment(new_integer).send({ from: this.state.account, gas: admin_gas}).on('receipt', (hash) => {
-    this.create_popup("notice", "Complete", "Action successful. Refresh the page to see the change");
-
-  }).catch(function(e){if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-}
-set_minimum_distribution_threshold = async (new_integer) =>{
-  this.state.tokenFarm.methods.set_minimum_distribution_threshold(new_integer).send({ from: this.state.account, gas: admin_gas}).on('receipt', (hash) => {
-    this.create_popup("notice", "Complete", "Action successful. Refresh the page to see the change");
-
-  }).catch(function(e){if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-}
-set_reward_interval = async (interval_in_seconds) =>{
-  this.state.tokenFarm.methods.set_reward_interval(interval_in_seconds).send({ from: this.state.account, gas: admin_gas}).on('receipt', (hash) => {
-    this.create_popup("notice", "Complete", "Action successful. Refresh the page to see the change");
-
-  }).catch(function(e){if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
-}
-
 
 donation_update_currency_value = (token_address) =>{
 
@@ -2383,7 +2077,6 @@ setInputFilter(textbox, inputFilter) {
       donationProcessor: {},
       ethBridge:{},
       maticBridge:{},
-      tokenFarm: {},
       charities_list:[],
       daiTokenBalance: '0',
       stakingBalance: '0',
@@ -2405,7 +2098,6 @@ setInputFilter(textbox, inputFilter) {
       donationProcessor: {},
       ethBridge:{},
       maticBridge:{},
-      tokenFarm: {},
       charities_list:[],
       daiTokenBalance: '0',
       stakingBalance: '0',

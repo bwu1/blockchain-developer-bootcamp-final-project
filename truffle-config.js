@@ -48,12 +48,12 @@ module.exports = {
 
 
 
-/*
+
 //Ropsten Settings
 module.exports = {
   networks: {
     ropsten: {
-      provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/bd3a71030ffd4e66af578f2b09777c14`), ///v3 not in the tutorial, but in openzepplin documentation
+      provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/bd3a71030ffd4e66af578f2b09777c14`),
       network_id: 3,       // Ropsten's id
       gas: 5500000,        // Ropsten has a lower block limit than mainnet
       confirmations: 2,    // # of confs to wait between deployments. (default: 0)
@@ -74,7 +74,7 @@ module.exports = {
     }
   }
 }
-*/
+
 
 
 
@@ -136,7 +136,7 @@ module.exports = {
 }
 */
 
-
+/*
 //Ganache settings
 module.exports = {
   networks: {
@@ -160,7 +160,7 @@ module.exports = {
     }
   }
 }
-
+*/
 
 
 
