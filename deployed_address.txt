@@ -1,0 +1,5 @@
+Testnet Network: Ropsten
+
+Donation_Processor: 0xC5D72B52683294d43574a0221fbc30F75fA5978a
+
+Donation_Upgrade: 0x769Cc018E52c1FFC88c71C7b537D177fE58B7c63
