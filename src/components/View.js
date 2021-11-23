@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-//import {CountUp} from "countUp.js-master";
 import Transaction from './Transaction'
 import dai from '../dai.png'
 

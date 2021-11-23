@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import ReactDOM from 'react-dom';
 import Web3 from 'web3';
 import BigNumber from "bignumber.js";
-import {CountUp} from "countUp.js-master";
+import { CountUp } from 'countup.js';
 import DappToken from '../abis/DappToken.json'
 import Donation_Processor from '../abis/Donation_Processor.json'
 

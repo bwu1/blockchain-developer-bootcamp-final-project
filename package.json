@@ -16,6 +16,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "chai-bignumber": "3.0.0",
+    "countup.js": "^2.0.8",
     "ethereumjs-tx": "^2.1.2",
     "fs": "0.0.1-security",
     "identicon.js": "^2.3.3",
@@ -47,7 +48,6 @@
   "directories": {
     "test": "test"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dappuniversity/defi_tutorial.git"
