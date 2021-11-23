@@ -118,9 +118,8 @@ class App extends Component {
         if(check_web3_network==networkId_global){
             const Donation_ProcessorData = Donation_Processor.networks[networkId];
             const donationProcessor = new web3.eth.Contract(Donation_Processor.abi, Donation_ProcessorData.address);
+
             this.setState({ donationProcessor });
-
-
         }
         else{
             this.create_popup("error","Please connect to the Ropsten network in your Web3 browser");
@@ -263,162 +262,6 @@ formatted_dollars(unformatted_number){
   }
 
 }  
-
-eth_deposit_update_latest_block = async(_latest_block_checked) =>{
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://givecrypto.finance/cron_jobs/fetch_wire_requests.php", true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');//application/json
-
-    xhr.onreadystatechange = function() {//Call a function when the state changes.
-
-        if(xhr.readyState == 4) {
-            //if(xhr.status == 200){
-              console.log(xhr.responseText);
-              global_is_bridging_to_matic=false;
-            //}
-
-        }
-        
-    }
-    xhr.send("type=" + "eth_deposit_update_latest_block" + "&latest_block=" + _latest_block_checked);
-
-
-
-
-}
-format_wire_requests_and_send_to_server = async (_events) =>{
-
-  var decimals=await this.state.ethBridge.methods.final_currency_decimal().call();
-  var wire_array=[];
-
-  for(var i = 0; i < _events.length; i++){
-
-      var this_block=_events[i]["blockNumber"];
-      var this_wire_request=_events[i]["returnValues"];
-
-      var wire_id=this_wire_request["_wire_count"];
-      var charity_address=this_wire_request["_from"];
-      var amount=this_wire_request["_withdraw_amount"];
-      var timestamp=this_wire_request["timestamp"];
-      wire_array.push([wire_id,charity_address,amount,timestamp,decimals,this_block]);
-  }
-
-
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "https://givecrypto.finance/cron_jobs/fetch_wire_requests.php", true);
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');//application/json
-
-  xhr.onreadystatechange = function() {//Call a function when the state changes.
-      if(xhr.readyState == 4) {
-        //if(xhr.status == 200){
-          console.log("Recursively update matic_wire_transfers: " + xhr.responseText);
-          global_is_fetching_wire_requests=false;
-        //}
-      }
-  }
-  xhr.send("type=" + "wire_transfer_matic" + "&value=" + JSON.stringify(wire_array));
-
-}
-
-fetch_matic_withdraw_requests = () =>{
-          if(global_is_fetching_wire_requests==true){
-            return;
-          }
-          global_is_fetching_wire_requests=true;
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "https://givecrypto.finance/cron_jobs/fetch_wire_requests.php", true);
-          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');//application/json
-          var that=this;
-
-          xhr.onreadystatechange = async function() {//Call a function when the state changes.
-              if(xhr.readyState == 4) {
-                if(xhr.status == 200){
-                    if(isNaN(xhr.responseText)==false){
-                      var fromBlock=Number(xhr.responseText)+1;//start search 1 block after the latest searched block
-                      var latest_block_checked=Number(xhr.responseText);
-
-                      let wire_withdraw_events= that.state.maticBridge.getPastEvents(
-                        "Wire_Withdraw", 
-                        {fromBlock: fromBlock, toBlock: "latest"}, 
-                        (err, events)=>{
-                          
-                          if(!err){
-
-                            if(events.length!==0){
-                              that.format_wire_requests_and_send_to_server(events);
-                            }
-                            else{
-                              global_is_fetching_wire_requests=false;
-                            }
-                          }
-                          else{
-                              console.log("bad blockchain response");
-                              global_is_fetching_wire_requests=false;
-                              return;
-                          }
-                          
-
-                        })
-                    }
-                    else{
-                      global_is_fetching_wire_requests=false;//did not return a reponse as a number value, therefore fail
-                      return;
-                    }
-                }
-                else{
-                    console.log("bad server response");
-                    global_is_fetching_wire_requests=false;
-                    return;
-                }
-
-              }
-          }
-          xhr.send("type=" + "wire_withdraw_latest_block"); 
-}
-fetch_layer_one_withdraw_requests = () =>{
-    let wire_withdraw_events= this.state.donationProcessor.getPastEvents(
-    "Wire_Withdraw", 
-    {fromBlock: 10862996, toBlock: "latest"}, 
-    (err, events)=>{
-      
-      if(!err){
-        let wire_array=[];
-        if(events.length!==0){
-          for(var i = 0; i < events.length; i++){
-            var this_wire_request=events[i]["returnValues"];
-            wire_array.push(this_wire_request);
-          }
-
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "https://givecrypto.finance/cron_jobs/fetch_wire_requests.php", true);
-          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');//application/json
-
-          xhr.onreadystatechange = function() {//Call a function when the state changes.
-              if(xhr.readyState == 4 && xhr.status == 200) {
-                  console.log("Recursively update wire_transfer_database: " + xhr.responseText);
-              }
-          }
-          xhr.send("type=" + "wire_transfer" + "&value=" + JSON.stringify(wire_array));
-
-          //that.format_wire_requests_and_send_to_server(events);
-        }
-        else{
-          console.log("no_events_detected");
-          //global_is_fetching_wire_requests=false;
-        }
-      }
-      else{
-          console.log("bad blockchain response: "+ err);
-          //global_is_fetching_wire_requests=false;
-          return;
-      }
-      
-
-    })
-  
-}
-
 fetch_reward_balance = async() =>{
 
 
@@ -431,15 +274,12 @@ fetch_reward_balance = async() =>{
     if(check_network == false){
       return;
     }
-
-
-
-//////////////////////////////////////////////////////////////////////////////Fetch Wire Requests///////////////////////////////////////////////
-    this.fetch_layer_one_withdraw_requests();
   }
 
 }
-update_wallet_balance(num){
+
+update_wallet_balance (num){
+
 
   this.setState({ daiTokenBalance: num.toString() }, () => {
     var check_rounding_errors=new BigNumber(this.state.daiTokenBalance.toString());///check for rounding errors
@@ -450,6 +290,7 @@ update_wallet_balance(num){
     });
     demo.start();
   })
+  
 
 }
 update_total_staked_balance(num){
@@ -538,7 +379,10 @@ update_supported_charities(charity_array){
 
 
 meta_load_wallet_data = async() =>{
-
+  var fetch_num_donations=await this.state.donationProcessor.methods.donation_count(this.state.account).call();
+  let demo = new CountUp('display_balance_num', fetch_num_donations, { decimalPlaces: 0,duration: 0.5, separator: ',',
+  });
+  demo.start();
 }
  meta_mask_approved = (result) =>{
       var formatted_address=window.web3.utils.toChecksumAddress(result[0]);
@@ -1476,6 +1320,7 @@ confirm_donation_pressed = async() =>{
         this.state.donationProcessor.methods.process_donation(amount,currency,charity_name,charity_ein,charity_wallet,currency_address,decimals).send({ from: this.state.account, gas: donation_gas, value: amount})
         .on('receipt', (hash) => {
             this.successful_donation_animation();
+            this.meta_load_wallet_data();
 
         }).catch(function(e){that.hide_loader(); document.querySelector('#donate_confirm_button').disabled=false; if(back_btn){back_btn.style.display="block";} if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
    
@@ -1491,10 +1336,7 @@ confirm_donation_pressed = async() =>{
         this_coin.methods.approve(this.state.donationProcessor._address, ammout_to_approve).send({ from: this.state.account }).on('transactionHash', (hash) => {//transactionHash
             this.state.donationProcessor.methods.process_donation(amount,currency,charity_name,charity_ein,charity_wallet,currency_address,decimals).send({ from: this.state.account, gas: donation_gas}).on('receipt', (hash) => {
             this.successful_donation_animation();
-            if(currency=="GIFT"){
-              var updated_wallet_balance=this.doDecimalSafeMath(this.state.daiTokenBalance,"-", amount);
-              this.update_wallet_balance(updated_wallet_balance);
-            }
+            this.meta_load_wallet_data();
 
             }).catch(function(e){that.hide_loader(); document.querySelector('#donate_confirm_button').disabled=false; if(back_btn){back_btn.style.display="block";}  if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
         }).catch(function(e){that.hide_loader(); document.querySelector('#donate_confirm_button').disabled=false; if(back_btn){back_btn.style.display="block";} if(e.code!==4001){alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
@@ -1504,10 +1346,7 @@ confirm_donation_pressed = async() =>{
           this.state.donationProcessor.methods.process_donation(amount,currency,charity_name,charity_ein,charity_wallet,currency_address,decimals).send({ from: this.state.account, gas: donation_gas})
           .on('receipt', (hash) => {
               this.successful_donation_animation();
-              if(currency=="GIFT"){
-                var updated_wallet_balance=this.doDecimalSafeMath(this.state.daiTokenBalance,"-", amount);
-                this.update_wallet_balance(updated_wallet_balance);
-              }
+              this.meta_load_wallet_data();
 
           }).catch(function(e){that.hide_loader(); document.querySelector('#donate_confirm_button').disabled=false; if(back_btn){back_btn.style.display="block";} if(e.code!==4001){console.log(e); alert("Transaction Error - Check your Web3 browser/crypto wallet and then try again");}}) 
 
@@ -2403,10 +2242,9 @@ setInputFilter(textbox, inputFilter) {
                     </div>
                     <div class="sc-eCImvq sc-jRQAMF hsMMVe bpzXao">
                        <div>
-                          <div  class="mvp_hidden">
-                            <div class="display_balance"><b>Wallet Balance </b><span id="display_balance_num">0</span><img src="gold_coin2.png" class="gold_coin" draggable="false"></img></div>
-                            <div class="display_balance"><b>Your Stake </b><span id="display_stake_num">0</span><img src="gold_coin2.png" class="gold_coin" draggable="false"></img></div>
-                          </div>
+
+                            <div class="display_balance"><b>Your Number of Donations (Fetched From Smart Contract): </b><span id="display_balance_num">0</span></div>
+
                           <button class="sc-dkPtyc gXugwo" id="connect_wallet_button" scale="sm" onClick={this.connect_wallet_pressed}>Connect Wallet</button>
                        </div>
                     </div>
