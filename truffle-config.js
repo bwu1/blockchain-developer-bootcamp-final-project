@@ -48,7 +48,7 @@ module.exports = {
 
 
 
-
+/*
 //Ropsten Settings
 module.exports = {
   networks: {
@@ -74,7 +74,7 @@ module.exports = {
     }
   }
 }
-
+*/
 
 
 
@@ -136,7 +136,7 @@ module.exports = {
 }
 */
 
-/*
+
 //Ganache settings
 module.exports = {
   networks: {
@@ -160,7 +160,7 @@ module.exports = {
     }
   }
 }
-*/
+
 
 
 
