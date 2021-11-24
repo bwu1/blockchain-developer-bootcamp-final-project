@@ -21,31 +21,6 @@ import './App.css'
 //const networkId_global = 5777;//Ganache
 const http_provider_url="https://ropsten.infura.io/v3/bd3a71030ffd4e66af578f2b09777c14";//Ropsten
 const networkId_global = 3;//Ropsten
-//const http_provider_url="https://rinkeby.infura.io/v3/fc4621d9a64840178957ed16ec31768f";//Rinkeby
-//const networkId_global = 4;//Rinkeby
-//const http_provider_url="https://kovan.infura.io/v3/928de4355458495abef4b8ffe50545ba";//Kovan
-//const networkId_global = 42;//Kovan
-//const http_provider_url="https://data-seed-prebsc-1-s1.binance.org:8545";//BSC Testnet
-//const networkId_global = 97;//BSC Testnet
-//const http_provider_url="https://polygon-mumbai.infura.io/v3/fc4621d9a64840178957ed16ec31768f";//Mumbai
-//const networkId_global = 80001;//Mumbai
-
-
-
-
-//////////////////////////////////////////////////////ETH->POLY Bridge///////////////////////////////
-const matic_http_provider_url="https://polygon-mumbai.infura.io/v3/fc4621d9a64840178957ed16ec31768f";
-const matic_networkId=80001;
-var global_is_bridging_to_matic=false;
-var global_deposit_events;
-var current_deposit_index=0;
-var successful_deposit_processed=0;
-//////////////////////////////////////////////////////MATIC Wire Requests////////////////////////////////
-var global_is_fetching_wire_requests=false;
-var global_wire_events;
-var current_wire_index=0;
-var successful_wire_processed=0;
-////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 const global_gasPrice=10000000000;//10 gwei
@@ -1363,23 +1338,6 @@ donate_page_back_pressed = () =>{
 }
 
 donate_continue_pressed = async() =>{
- /* var is_checked=document.getElementById("anonymous_donation_input").checked;
-  var first_name_input;
-  var last_name_input;
-  if(is_checked===true){
-      first_name_input="Anonymous";
-      last_name_input="";
-      global_donation_info["anonymous"]=true;
-  }
-  else{
-      first_name_input=document.getElementById("donation_first_name").value.trim();
-      last_name_input=document.getElementById("donation_last_name").value.trim();
-      if(first_name_input==="" || last_name_input===""){
-        alert("Please enter both your first and last name. Otherwise, check the 'Anonymous Donation' box");
-        return;
-      }
-      global_donation_info["anonymous"]=false;
-  }*/
 
   var first_name_input="Anonymous";///set all payments to anonymous
   var last_name_input="";///set all payments to anonymous
@@ -2426,45 +2384,3 @@ setInputFilter(textbox, inputFilter) {
 }
 
 export default App;
-
-/*
-
-
-
-                  <option value="ETH" contract_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" mainnet_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2">ETH</option>
-                  <option value="DAI" contract_address="0xEC5dCb5Dbf4B114C9d0F65BcCAb49EC54F6A0867" mainnet_address="0x6B175474E89094C44Da98b954EedeAC495271d0F">DAI (BSC)</option>
-                  <option value="USDC" contract_address="0xb58A25294f399f7056a4cD5DAE3c2Fb9259e360d" mainnet_address="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">USDC (BSC)</option>
-                  <option value="USDC" contract_address="0xb58A25294f399f7056a4cD5DAE3c2Fb9259e360d">USDC (BSC)</option>
-                  <option value="NINE" contract_address="0x75ca10780A2D256655C40037E616903C57d31bbc">NINE</option>
-                  <option value="BUSD" contract_address="0x2963EEef46978C745b45B6Da29B78d9cC0708855">BUSD</option>
-                  <option value="USD" contract_address="0x2963EEef46978C745b45B6Da29B78d9cC0708855">USD (BSC)</option>
-                  <option value="USD" contract_address="0xaa57543e9246E67c82E45E7e9faf90548A6297F7">USD (KOV)</option>
-                  <option value="OTHER" contract_address="">OTHER</option>
-
-///////////////////////////////////////////////////////////////////////////////BSC////////////////////////////////////////////////
-
-                  <option value="ETH" contract_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" mainnet_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2">ETH</option>
-                  <option value="DAI" contract_address="0xEC5dCb5Dbf4B114C9d0F65BcCAb49EC54F6A0867" mainnet_address="0x6B175474E89094C44Da98b954EedeAC495271d0F">DAI (BSC)</option>
-                  <option value="USDC" contract_address="0xb58A25294f399f7056a4cD5DAE3c2Fb9259e360d" mainnet_address="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">USDC (BSC)</option>
-                  <option value="OTHER" contract_address="">OTHER</option>
-
-///////////////////////////////////////////////////////////////////////////////Ropsten////////////////////////////////////////////
-                  <option value="ETH" contract_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2" mainnet_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2">ETH</option>
-                  <option value="UNI" contract_address="0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984" mainnet_address="0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984">UNI</option>
-                  <option value="NINE" contract_address="0x6e40dd99E83AaD1b7B6F80c24CCBB8a1dC54c24D" mainnet_address="0xfF20817765cB7f73d4bde2e66e067E58D11095C2">NINE</option>
-                  <option value="USDC" contract_address="0x07865c6E87B9F70255377e024ace6630C1Eaa37F" mainnet_address="0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48">USDC</option>
-                  <option value="OTHER" contract_address="">OTHER</option>
-
-
-///////////////////////////////////////////////////////////////////////////////KOVAN////////////////////////////////////////////
-                  <option value="ETH" contract_address="0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2">ETH</option>
-                  <option value="DAI" contract_address="0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa">DAI</option>
-                  <option value="UNI" contract_address="0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984">UNI</option>
-                  <option value="NINE" contract_address="0x6e40dd99E83AaD1b7B6F80c24CCBB8a1dC54c24D">NINE (Ropstein)</option>
-                  <option value="USDC" contract_address="0x07865c6E87B9F70255377e024ace6630C1Eaa37F">USDC (Ropstein)</option>
-                  <option value="USDC" contract_address="0xaa57543e9246E67c82E45E7e9faf90548A6297F7">USDC (Kovan)</option>
-                  <option value="OTHER" contract_address="">OTHER</option>
-
-
-
-*/
