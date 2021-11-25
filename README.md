@@ -24,7 +24,7 @@ To get started:
  Public Ethereum account for the NFT certification: 0x69399F75290e247F5039c6a8F3383FF855A0cd4e
  
  
- Frontend Hosting Service URL:
+ Frontend Hosting Service URL: https://shrill-dawn-9935.on.fleek.co/final_project/
  
  
  Screencast Walkthrough URL: https://youtu.be/2c8hUeja3hg

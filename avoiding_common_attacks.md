@@ -1,7 +1,7 @@
 # Avoiding Common Attacks
 
 
-1. Proper use of .call and .delegateCal
+1. Proper use of .call and .delegateCall
 
 - There are 2 smart contracts at the core of the app - Donation_Processor and Donation_Upgrade. 
 - Donation_Processor is responsible for storing the contract's data, while Donation_Upgrade is responsible for executing the contract's logic via a delegate_call from Donation_Processor
