@@ -33,7 +33,7 @@ donate_pressed = () =>{
       else{
           condensed_details=charity_details;
       }
-      var charity_logo="/logos/char_"+charity_id+".jpg";
+      var charity_logo="./logos/char_"+charity_id+".jpg";
       var charity_url=this.props.this_charity.url;
 
       var buttons_div=<div class="stake_donate_buttons">
