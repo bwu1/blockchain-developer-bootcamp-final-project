@@ -1,15 +1,15 @@
 {
-  "main.css": "/final_proect/static/css/main.bd97043c.chunk.css",
-  "main.js": "/final_proect/static/js/main.841b0f8c.chunk.js",
-  "main.js.map": "/final_proect/static/js/main.841b0f8c.chunk.js.map",
-  "static/css/1.56bf7600.chunk.css": "/final_proect/static/css/1.56bf7600.chunk.css",
-  "static/js/1.d61f2061.chunk.js": "/final_proect/static/js/1.d61f2061.chunk.js",
-  "static/js/1.d61f2061.chunk.js.map": "/final_proect/static/js/1.d61f2061.chunk.js.map",
-  "runtime~main.js": "/final_proect/static/js/runtime~main.6c101f7a.js",
-  "runtime~main.js.map": "/final_proect/static/js/runtime~main.6c101f7a.js.map",
-  "static/css/main.bd97043c.chunk.css.map": "/final_proect/static/css/main.bd97043c.chunk.css.map",
-  "static/css/1.56bf7600.chunk.css.map": "/final_proect/static/css/1.56bf7600.chunk.css.map",
-  "index.html": "/final_proect/index.html",
-  "precache-manifest.a9ef5d98be3dbbf4cadb811461cb9852.js": "/final_proect/precache-manifest.a9ef5d98be3dbbf4cadb811461cb9852.js",
-  "service-worker.js": "/final_proect/service-worker.js"
+  "main.css": "/final_project/static/css/main.bd97043c.chunk.css",
+  "main.js": "/final_project/static/js/main.e8506c86.chunk.js",
+  "main.js.map": "/final_project/static/js/main.e8506c86.chunk.js.map",
+  "static/css/1.56bf7600.chunk.css": "/final_project/static/css/1.56bf7600.chunk.css",
+  "static/js/1.d82c4410.chunk.js": "/final_project/static/js/1.d82c4410.chunk.js",
+  "static/js/1.d82c4410.chunk.js.map": "/final_project/static/js/1.d82c4410.chunk.js.map",
+  "runtime~main.js": "/final_project/static/js/runtime~main.4aeed05c.js",
+  "runtime~main.js.map": "/final_project/static/js/runtime~main.4aeed05c.js.map",
+  "static/css/1.56bf7600.chunk.css.map": "/final_project/static/css/1.56bf7600.chunk.css.map",
+  "static/css/main.bd97043c.chunk.css.map": "/final_project/static/css/main.bd97043c.chunk.css.map",
+  "index.html": "/final_project/index.html",
+  "precache-manifest.7dbc9c4db696bb0562d522f2a9df9fdb.js": "/final_project/precache-manifest.7dbc9c4db696bb0562d522f2a9df9fdb.js",
+  "service-worker.js": "/final_project/service-worker.js"
 }

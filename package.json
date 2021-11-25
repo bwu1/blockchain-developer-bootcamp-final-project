@@ -1,7 +1,7 @@
 {
   "name": "defi-tutorial",
   "version": "0.1.0",
-  "homepage": "https://google.com/final_proect",
+  "homepage": "https://google.com/final_project",
   "description": "DeFi Token Staking App",
   "author": "gregory@dappuniversity.com",
   "dependencies": {
