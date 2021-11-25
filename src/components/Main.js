@@ -13,7 +13,7 @@ details_pressed = () =>{
   this.props.parent.details_pressed(this.props.this_charity.id);
 }
 donate_pressed = () =>{
-  var charity_logo="/logos/char_"+this.props.this_charity.id+".jpg";
+  var charity_logo="./logos/char_"+this.props.this_charity.id+".jpg";
   this.props.parent.donate_pressed(this.props.this_charity.id, this.props.this_charity.name, this.props.this_charity.ein, charity_logo, this.props.this_charity.wallet_address);
 }
 
